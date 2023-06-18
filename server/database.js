@@ -11,14 +11,4 @@ const pool = new Pool({
 
 pool.connect();
 
-// pool.query('SELECT * FROM products', (err, res) => {
-//     if(!err){
-//         console.log(res.rows);
-//     } else {
-//         console.log(err.message);
-//     }
-
-//     pool.end;
-// });
-
 export default pool;

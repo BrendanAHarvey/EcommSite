@@ -56,13 +56,10 @@ const Main = () => {
     baseURL: 'http://localhost:5000/api'
   });
 
-  const API_URL = 'http://localhost:5000/api'
-
   useEffect(() => {
     api.get(`/products`).then((response) => {
       setProducts(response.data);
       console.log(products);
-      console.log('server test')
     }).catch((err) => {
       console.error(err);
     });
@@ -101,7 +98,7 @@ const Main = () => {
 
   const renderProduct = (product) => {
     return (
-      <div className='w-full shadow-md flex flex-col p-4 my-4 items-center justify-center rounded-lg hover:scale-105 duration-300'>
+      <div className='w-full shadow-md flex flex-col p-4 items-center justify-center rounded-lg hover:scale-105 duration-300'>
         <p>{productImgElements[product.id - 1]}</p>
         <h3>{product.name}</h3>
         <p>{product.price}</p>
