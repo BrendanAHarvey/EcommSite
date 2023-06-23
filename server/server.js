@@ -9,14 +9,8 @@ import PgSession from 'connect-pg-simple'
 // Initilising the express server
 const app = express();
 
-const corsOptions = {
-    origin: 'http://localhost:3000',
-    credentials: false,
-    optionSuccessStatus: 200
-};
-
 const authenticateUser = (req, res, next) => {
-  if (req.session.user) {
+  if (req.session.user && req.session.user.isAuthenticated) {
     // User is authenticated
     next();
   } else {
@@ -29,7 +23,6 @@ const pgSession = PgSession(session);
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors(corsOptions));
 app.use(cors());
 app.use(express.json());
 app.use(
@@ -42,12 +35,23 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
-      httpOnly: true,
+      secure: false,
+      httpOnly: false,
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
 )
+
+// Route to retrieve user data
+app.get('/api/users', async (req, res) => {
+  try {
+    const user = await pool.query('SELECT * FROM user WHERE id=$1', [req.params.id]);
+    res.json(user[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error')
+  }
+})
 
 
 // Routes to retrieve product data
@@ -103,26 +107,36 @@ app.post('/api/login', async (req, res) => {
     const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (user.rows.length === 0) {
       return res.status(400).send( 'Invalid email or password' )
-    }
+    };
 
     // Compare provided password with hashed password
     const passwordMatch = await bcrypt.compare(password, user.rows[0].password);
     if (!passwordMatch) {
       return res.status(400).send( 'Invalid email or password' )
-    }
+    };
 
-    // Store user information in the session
-    req.session.userId = user.rows[0].id
+    // // Store user information in the session
+    // req.session.user = user.rows[0]
+    // // Login successful
+    // const isAuthenticated = true;
 
-    // Login successful
-    const isAuthenticated = true;
+    req.session.user = {
+      id: user.rows[0].id,
+      isAuthenticated: true
+    };
 
-    res.json({ isAuthenticated })
+    req.session.save();
+
+    res.json({ isAuthenticated: true})
     console.log('Authenticated');
   } catch (err) {
     console.log(err);
     res.status(500).send('Server error')
   }
+});
+
+app.get('/api/authUser', authenticateUser, (req, res) => {
+  const authUser = req.session.user.id;
 });
 
 
@@ -196,7 +210,7 @@ app.listen(port, () => {
 
 
 
-// Routes to update the cart 
+// // Routes to update the cart 
 // app.post('/api/cart', async (req, res) => {
 //   try {
 //     // Add the product with the specified ID and quantity to the cart

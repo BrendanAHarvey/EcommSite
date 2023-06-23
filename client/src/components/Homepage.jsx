@@ -9,8 +9,7 @@ import Main from './Main';
 
 const HomePage = () => {
   return (
-    <div>
-      <Navbar />
+    <div name='home' className=''>
       <Hero />
       <About />
       <Main />
