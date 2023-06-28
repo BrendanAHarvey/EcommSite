@@ -53,6 +53,7 @@ const Main = () => {
   const [products, setProducts] = useState([]);
   const [authUser, setAuthUser] = useState('');
   const [quantity, setQuantity] = useState(0);
+  const [cart, setCart] = useState([]);
 
   const api = axios.create({
     baseURL: 'http://localhost:5000/api'
@@ -63,7 +64,7 @@ const Main = () => {
       setProducts(response.data);
       console.log(products);
     }).catch((err) => {
-      console.error(err);
+      console.log(err);
     });
   }, []);
 
@@ -82,28 +83,41 @@ const Main = () => {
     setSelectedProduct(product);
   };
 
-  const handleCart = (authUser, productId, quantity) => {
-    if (authUser, productId, quantity) {
+  const handleCart = async (authUser, productId, quantity) => {
+    try {
       setQuantity(quantity);
-      api.post('/cart', { authUser, productId, quantity })
-        .then((response) => {
-          console.log(response.data);
-          // Update the cart state in your React component
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } else {
-      api.delete(`/cart/${productId}`)
-        .then((response) => {
-          console.log(response.data);
-          // Update the cart state in your React component
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      const response = await api.post('/cart', authUser, productId, quantity);
+      console.log(response.data);
+      return response.data
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  // const handleCart = (authUser, productId, quantity) => {
+  //   if (authUser, productId, quantity) {
+  //     setQuantity(quantity);
+  //     api.post('/cart', { authUser, productId, quantity })
+  //       .then((response) => {
+  //         console.log(response.data);
+  //         return response.data;
+  //         // Update the cart state in your React component
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   } else {
+  //     api.delete(`/cart/${productId}`)
+  //       .then((response) => {
+  //         console.log(response.data);
+  //         return response.data;
+  //         // Update the cart state in your React component
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   }
+  // };
   
   // ...
   
